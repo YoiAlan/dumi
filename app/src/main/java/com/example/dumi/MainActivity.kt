@@ -9,8 +9,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dumi.databinding.ActivityMainBinding
-import com.example.mqttclient.MqttService
-import org.eclipse.paho.client.mqttv3.MqttClient
+import com.example.mqttclient.mqttService
+import org.eclipse.paho.android.service.MqttAndroidClient
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttMessage
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,11 +20,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val josht = MqttAndroidClient(this, "tcp://10.42.0.1:7010", "YoiAlan")
+        josht.connect()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val intent = Intent(this, MqttService::class.java)
-        startService(intent)
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)

@@ -3,11 +3,12 @@ package com.example.mqttclient
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-class MqttService : Service() {
+class mqttService : Service() {
 
     private lateinit var mqttClient: MqttAndroidClient
     private val serverUri = "tcp://10.42.0.1:7010"
@@ -17,9 +18,13 @@ class MqttService : Service() {
     override fun onCreate() {
         super.onCreate()
         mqttClient = MqttAndroidClient(applicationContext, serverUri, clientId)
-        mqttClient.setCallback(object : MqttCallback {
+        mqttClient.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                sendLogMessage("connection established to $serverURI")
+                subscribe()
+            }
             override fun connectionLost(cause: Throwable?) {
-                // Handle connection lost
+                sendLogMessage("Connection lost: ${cause?.message}")
             }
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
@@ -34,6 +39,12 @@ class MqttService : Service() {
             }
         })
         connect()
+    }
+    private fun sendLogMessage(message: String) {
+        val intent = Intent("mqttLog").apply {
+            putExtra("logMessage", message)
+        }
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
     private fun connect() {
